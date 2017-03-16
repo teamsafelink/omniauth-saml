@@ -22,10 +22,10 @@ module OmniAuth
       ]
       option :attribute_service_name, 'Required attributes'
       option :attribute_statements, {
-        name: ["name"],
-        email: ["email", "mail"],
-        first_name: ["first_name", "firstname", "firstName"],
-        last_name: ["last_name", "lastname", "lastName"]
+        :name => ["name"],
+        :email => ["email", "mail"],
+        :first_name => ["first_name", "firstname", "firstName"],
+        :last_name => ["last_name", "lastname", "lastName"]
       }
       option :slo_default_relay_state
       option :uid_attribute
@@ -176,7 +176,7 @@ module OmniAuth
       end
 
       def handle_response(raw_response, opts, settings)
-        response = OneLogin::RubySaml::Response.new(raw_response, opts.merge(settings: settings))
+        response = OneLogin::RubySaml::Response.new(raw_response, opts.merge(:settings => settings))
         response.attributes["fingerprint"] = options.idp_cert_fingerprint
         response.soft = false
 
@@ -235,7 +235,7 @@ module OmniAuth
 
           # Generate a response to the IdP.
           logout_request_id = logout_request.id
-          logout_response = OneLogin::RubySaml::SloLogoutresponse.new.create(settings, logout_request_id, nil, RelayState: slo_relay_state)
+          logout_response = OneLogin::RubySaml::SloLogoutresponse.new.create(settings, logout_request_id, nil, :RelayState => slo_relay_state)
           redirect(logout_response)
         else
           raise OmniAuth::Strategies::SAML::ValidationError.new("SAML failed to process LogoutRequest")
@@ -254,7 +254,7 @@ module OmniAuth
           settings.name_identifier_value = session["saml_uid"]
         end
 
-        logout_request.create(settings, RelayState: slo_relay_state)
+        logout_request.create(settings, :RelayState => slo_relay_state)
       end
     end
   end
