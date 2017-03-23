@@ -171,6 +171,11 @@ module OmniAuth
 
       private
 
+      def request_path
+        # Do not store since options are updated when setup_phase is called
+        options[:request_path].is_a?(String) ? options[:request_path] : "#{path_prefix}/#{name}"
+      end
+
       def on_subpath?(subpath)
         on_path?("#{request_path}/#{subpath}")
       end
