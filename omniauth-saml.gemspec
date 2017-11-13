@@ -12,8 +12,6 @@ Gem::Specification.new do |gem|
   gem.homepage      = 'https://github.com/omniauth/omniauth-saml'
 
   gem.add_runtime_dependency 'omniauth', '~> 1.3'
-  # force to install hashie 2.0.5 that supports ruby 1.8.7
-  gem.add_runtime_dependency 'hashie', '2.0.5'
   gem.add_runtime_dependency 'ruby-saml', '~> 1.4'
 
   gem.add_development_dependency 'rake', '>= 10', '< 12'
