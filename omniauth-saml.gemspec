@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = 'rajiv@alum.mit.edu'
   gem.homepage      = 'https://github.com/omniauth/omniauth-saml'
 
-  gem.required_ruby_version = '>= 2.4'
+  gem.required_ruby_version = '>= 2.3'
 
   gem.add_runtime_dependency 'omniauth', '~> 2.0'
   gem.add_runtime_dependency 'ruby-saml', '~> 1.12'

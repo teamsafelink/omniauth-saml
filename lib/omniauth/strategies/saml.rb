@@ -124,9 +124,16 @@ module OmniAuth
         @request_path_pattern ||= %r{\A#{Regexp.quote(request_path)}(/|\z)}
       end
 
+      # Implementation taken from:
+      # https://github.com/omniauth/omniauth/blob/a62d36b3f847e0e55b077790112e96950c35085a/lib/omniauth/strategy.rb#L436
+      # We're just overriding the request_path method from OmniAuth::Strategy to remove
+      # memoization of request_path since options are updated when setup_phase is called
       def request_path
-        # Do not store since options are updated when setup_phase is called
-        options[:request_path].is_a?(String) ? options[:request_path] : "#{path_prefix}/#{name}"
+        if options[:request_path].is_a?(String)
+          options[:request_path]
+        else
+          "#{script_name}#{path_prefix}/#{name}"
+        end
       end
 
       def on_subpath?(subpath)
