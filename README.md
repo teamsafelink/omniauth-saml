@@ -2,14 +2,12 @@
 
 [![Gem Version](http://img.shields.io/gem/v/omniauth-saml.svg)][gem]
 [![Build Status](http://img.shields.io/travis/omniauth/omniauth-saml.svg)][travis]
-[![Dependency Status](http://img.shields.io/gemnasium/omniauth/omniauth-saml.svg)][gemnasium]
-[![Code Climate](http://img.shields.io/codeclimate/github/omniauth/omniauth-saml.svg)][codeclimate]
+[![Maintainability](https://api.codeclimate.com/v1/badges/749e17b553ea944522c1/maintainability)][codeclimate]
 [![Coverage Status](http://img.shields.io/coveralls/omniauth/omniauth-saml.svg)][coveralls]
 
 [gem]: https://rubygems.org/gems/omniauth-saml
 [travis]: http://travis-ci.org/omniauth/omniauth-saml
-[gemnasium]: https://gemnasium.com/omniauth/omniauth-saml
-[codeclimate]: https://codeclimate.com/github/omniauth/omniauth-saml
+[codeclimate]: https://codeclimate.com/github/omniauth/omniauth-saml/maintainability
 [coveralls]: https://coveralls.io/r/omniauth/omniauth-saml
 
 A generic SAML strategy for OmniAuth available under the [MIT License](LICENSE.md)
@@ -19,11 +17,11 @@ https://github.com/omniauth/omniauth-saml
 ## Requirements
 
 * [OmniAuth](http://www.omniauth.org/) 1.3+
-* Ruby 1.9.x or Ruby 2.1.x+
+* Ruby 2.4.x+
 
 ## Versioning
 
-We tag and release gems according to the [Semantic Versioning](http://semver.org/) principle.
+We tag and release gems according to the [Semantic Versioning](http://semver.org/) principle. In addition to the guidelines of Semantic Versioning, we follow a further guideline that otherwise backwards-compatible dependency upgrades for security reasons should generally be cause for a MINOR version upgrade as opposed to a PATCH version upgrade. Backwards-incompatible dependency upgrades for security reasons should still result in a MAJOR version upgrade for this library.
 
 ## Usage
 
@@ -37,6 +35,10 @@ use OmniAuth::Strategies::SAML,
   :idp_sso_target_url                 => "idp_sso_target_url",
   :idp_sso_target_url_runtime_params  => {:original_request_param => :mapped_idp_param},
   :idp_cert                           => "-----BEGIN CERTIFICATE-----\n...-----END CERTIFICATE-----",
+  :idp_cert_multi                     => {
+                                           :signing => ["-----BEGIN CERTIFICATE-----\n...-----END CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n...-----END CERTIFICATE-----", ...],
+                                           :encryption => []
+                                         }
   :idp_cert_fingerprint               => "E7:91:B2:E1:...",
   :idp_cert_fingerprint_validator     => lambda { |fingerprint| fingerprint },
   :name_identifier_format             => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
@@ -60,6 +62,10 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     :idp_sso_target_url                 => "idp_sso_target_url",
     :idp_sso_target_url_runtime_params  => {:original_request_param => :mapped_idp_param},
     :idp_cert                           => "-----BEGIN CERTIFICATE-----\n...-----END CERTIFICATE-----",
+    :idp_cert_multi                     => {
+                                             :signing => ["-----BEGIN CERTIFICATE-----\n...-----END CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n...-----END CERTIFICATE-----", ...],
+                                             :encryption => []
+                                           }
     :idp_cert_fingerprint               => "E7:91:B2:E1:...",
     :idp_cert_fingerprint_validator     => lambda { |fingerprint| fingerprint },
     :name_identifier_format             => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
@@ -70,7 +76,7 @@ For IdP-initiated SSO, users should directly access the IdP SSO target URL. Set 
 
 A `OneLogin::RubySaml::Response` object is added to the `env['omniauth.auth']` extra attribute, so we can use it in the controller via `env['omniauth.auth'].extra.response_object`
 
-## Metadata
+## SP Metadata
 
 The service provider metadata used to ease configuration of the SAML SP in the IdP can be retrieved from `http://example.com/auth/saml/metadata`. Send this URL to the administrator of the IdP.
 
@@ -107,16 +113,20 @@ Note that when [integrating with Devise](#devise-integration), the URL path will
   `original_param_value`. Optional.
 
 * `:idp_cert` - The identity provider's certificate in PEM format. Takes precedence
-  over the fingerprint option below. This option or `:idp_cert_fingerprint` or `:idp_cert_fingerprint_validator` must
+  over the fingerprint option below. This option or `:idp_cert_multi` or `:idp_cert_fingerprint` or `:idp_cert_fingerprint_validator` must
   be present.
+  
+* `:idp_cert_multi` - Multiple identity provider certificates in PEM format. Takes precedence
+over the fingerprint option below. This option `:idp_cert` or `:idp_cert_fingerprint` or `:idp_cert_fingerprint_validator` must
+be present.
 
 * `:idp_cert_fingerprint` - The SHA1 fingerprint of the certificate, e.g.
   "90:CC:16:F0:8D:...". This is provided from the identity provider when setting up
-  the relationship. This option or `:idp_cert` or `:idp_cert_fingerprint_validator` MUST be present.
+  the relationship. This option or `:idp_cert` or `:idp_cert_multi` or `:idp_cert_fingerprint_validator` MUST be present.
 
 * `:idp_cert_fingerprint_validator` - A lambda that MUST accept one parameter
   (the fingerprint), verify if it is valid and return it if successful. This option
-  or `:idp_cert` or `:idp_cert_fingerprint` MUST be present.
+  or `:idp_cert` or `:idp_cert_multi` or `:idp_cert_fingerprint` MUST be present.
 
 * `:name_identifier_format` - Used during SP-initiated SSO. Describes the format of
   the username required by this application. If you need the email address, use
@@ -144,6 +154,27 @@ Note that when [integrating with Devise](#devise-integration), the URL path will
 * `:uid_attribute` - Attribute that uniquely identifies the user. If unset, the name identifier returned by the IdP is used.
 
 * See the `OneLogin::RubySaml::Settings` class in the [Ruby SAML gem](https://github.com/onelogin/ruby-saml) for additional supported options.
+
+## IdP Metadata
+
+You can use the `OneLogin::RubySaml::IdpMetadataParser` to configure some options:
+
+```ruby
+require 'omniauth'
+idp_metadata_parser = OneLogin::RubySaml::IdpMetadataParser.new
+idp_metadata = idp_metadata_parser.parse_remote_to_hash("http://idp.example.com/saml/metadata")
+
+# or, if you have the metadata in a String:
+# idp_metadata = idp_metadata_parser.parse_to_hash(idp_metadata_xml)
+
+use OmniAuth::Strategies::SAML,
+  idp_metadata.merge(
+    :assertion_consumer_service_url => "consumer_service_url",
+    :issuer                         => "issuer"
+  )
+```
+
+See the [Ruby SAML gem's README](https://github.com/onelogin/ruby-saml#metadata-based-configuration) for more details.
 
 ## Devise Integration
 
@@ -173,7 +204,7 @@ advertised in metadata by setting the `single_logout_service_url` config option)
 When using Devise as an authentication solution, the SP initiated flow can be integrated
 in the `SessionsController#destroy` action.
 
-For this to work it is important to preserve the `saml_uid` value before Devise
+For this to work it is important to preserve the `saml_uid` and `saml_session_index` value before Devise
 clears the session and redirect to the `/spslo` sub-path to initiate the single logout.
 
 Example `destroy` action in `sessions_controller.rb`:
@@ -183,17 +214,19 @@ class SessionsController < Devise::SessionsController
   # ...
 
   def destroy
-    # Preserve the saml_uid in the session
-    saml_uid = session["saml_uid"]
+    # Preserve the saml_uid and saml_session_index in the session
+    saml_uid = session['saml_uid']
+    saml_session_index = session['saml_session_index']
     super do
-      session["saml_uid"] = saml_uid
+      session['saml_uid'] = saml_uid
+      session['saml_session_index'] = saml_session_index
     end
   end
 
   # ...
 
   def after_sign_out_path_for(_)
-    if session['saml_uid'] && SAML_SETTINGS.idp_slo_target_url
+    if session['saml_uid'] && session['saml_session_index'] && SAML_SETTINGS.idp_slo_target_url
       user_saml_omniauth_authorize_path + "/spslo"
     else
       super

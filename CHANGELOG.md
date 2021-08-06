@@ -1,3 +1,80 @@
+<a name="v2.0.0"></a>
+### v2.0.0 (2021-01-13)
+
+
+#### Chores
+
+* Allow OmniAuth 2.0.0	 ([f7ec7ee](/../../commit/f7ec7ee))
+
+
+<a name="v1.10.3"></a>
+### v1.10.3 (2020-10-06)
+
+
+#### Bug Fixes
+
+* add options to logout_request initialization	 ([c271a37](/../../commit/c271a37))
+
+
+<a name="v1.10.2"></a>
+### v1.10.2 (2018-05-23)
+
+
+#### Features
+
+* **saml**
+  * inherits allows response options from ruby-saml instead of whitelist	 ([a0eedd6](/../../commit/a0eedd6))
+
+
+<a name="v1.10.1"></a>
+### v1.10.1 (2018-06-07)
+
+
+#### Features
+
+* **saml-response**
+  * whitelist more response options	 ([575198d](/../../commit/575198d))
+
+
+<a name="v1.10.0"></a>
+### v1.10.0 (2018-02-19)
+
+
+#### Bug Fixes
+
+* ambiguous path match in other phase	 ([1b465b9](/../../commit/1b465b9))
+* Update ruby-saml gem to 1.7 or later to fix CVE-2017-11430 ([6bc28ad](/../../commit/6bc28ad))
+
+
+<a name="v1.9.0"></a>
+### v1.9.0 (2018-01-29)
+
+
+#### Bug Fixes
+
+* Update omniauth gem to 1.3.2 or later 1.3.x	 ([b6bb425](/../../commit/b6bb425))
+
+
+<a name="v1.8.1"></a>
+### v1.8.1 (2017-06-22)
+
+
+#### Bug Fixes
+
+* default assertion_consumer_service_url not set during callback	 ([4a2a5ef](/../../commit/4a2a5ef))
+
+
+<a name="v1.8.0"></a>
+### v1.8.0 (2017-06-07)
+
+
+#### Features
+
+* include SessionIndex in logout requests	 ([fb6ad86](/../../commit/fb6ad86))
+* Support for configurable IdP SLO session destruction	 ([586bf89](/../../commit/586bf89))
+* Add `uid_attribute` option to control the attribute used for the user id.	 ([eacc536](/../../commit/eacc536))
+
+
 <a name="v1.7.0"></a>
 ### v1.7.0 (2016-10-19)
 
