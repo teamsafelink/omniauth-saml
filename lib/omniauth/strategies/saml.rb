@@ -69,7 +69,7 @@ module OmniAuth
       end
 
       def other_phase
-        if current_path.start_with?(request_path)
+        if request_path_pattern.match(current_path)
           @env['omniauth.strategy'] ||= self
           setup_phase
 
@@ -123,6 +123,10 @@ module OmniAuth
       def request_path
         # Do not store since options are updated when setup_phase is called
         options[:request_path].is_a?(String) ? options[:request_path] : "#{path_prefix}/#{name}"
+      end
+
+      def request_path_pattern
+        @request_path_pattern ||= %r{\A#{Regexp.quote(request_path)}(/|\z)}
       end
 
       def on_subpath?(subpath)
